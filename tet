@@ -1,0 +1,78 @@
+import random
+import tkinter as tk
+
+class TetrisGame(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Тетрис")
+        self.board = [[0] * 10 for _ in range(20)]
+        self.score = 0
+        self.level = 1
+        self.create_widgets()
+        self.new_game()
+
+    def create_widgets(self):
+        self.canvas = tk.Canvas(self, width=400, height=400, bg='black')
+        self.canvas.pack()
+        self.next_piece_canvas = tk.Canvas(self, width=100, height=100, bg='black')
+        self.next_piece_canvas.pack()
+        self.score_label = tk.Label(self, text=f"Счет: {self.score}", font=('Helvetica', 14))
+        self.score_label.pack()
+        self.level_label = tk.Label(self, text=f"Уровень: {self.level}", {self.level}", font=('Helvetica', 14))
+        self.level_label.pack()
+
+    def new_game(self):
+        self.score = 0
+        self.level = 1
+        self.generate_new_piece()
+        self.drop_piece()
+
+    def generate_new_piece(self):
+        self.piece = [[0] * 4 for _ in range(4)]
+        for i in range(4):
+            for j in range(4):
+                if random.randint(0, 3) == 0:
+                    self.piece[i][3 - j] = 1
+        self.canvas.delete('all')
+        self.draw_next_piece()
+
+    def draw_next_piece(self):
+        for i in range(4):
+            for j in range(4):
+                if self.piece[i][j] == 1:
+                    x = 30 * (i % 2) + 15 * (j % 2)
+                    y = 30 * (i // 2) + 15 * (j // 2)
+                    self.next_piece_canvas.create_rectangle(x, y, x + 30, y + 30, fill='green')
+
+    def draw_piece(self):
+        for i in range(4):
+            for j in range(4):
+                if self.piece[i][j] == 1:
+                    x = self.piece_position[0] + i
+                    y = self.piece_position[1] - j
+                    self.canvas.create_rectangle(x, y, x + 1, y + 1, fill='green')
+
+    def drop_piece(self):
+        self.piece_position = [0, 0]
+        self.draw_piece()
+        self.canvas.after(100, self.check_collision)
+
+    def check_collision(self):
+        for i in range(4):
+            for j in range(4):
+                if self.piece[i][j] == 1:
+                    x = self.piece_position[0] + i
+                    y = self.piece_position[1] - j
+                    if y < 0 or y >= 20 or x < 0 or x >= 10 or self.board[y][x] == 1:
+                        self.game_over()
+                        return
+        self.board[self.piece_position[1]][self.piece_position[0]] = 1
+        self.draw_piece()
+        self.score += 1
+        self.score_label.config(text=f"Счет: {self.score}")
+        self.canvas.after(100, self.move_down)
+
+    def game_over(self):
+        self.canvas.delete('all')
+        self.canvas.create_text(200, 150, text="Игра окончена!", fill='red',
+Ответ 
